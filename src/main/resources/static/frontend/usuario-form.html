@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${editando} ? 'Editar Usuario' : 'Nuevo Usuario'">Formulario Usuario</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar básico -->
+        <nav class="col-md-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/usuarios">
+                            <i class="fas fa-users"></i> Usuarios
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-10 ms-sm-auto px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2" th:text="${editando} ? 'Editar Usuario' : 'Nuevo Usuario'">Formulario Usuario</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="/admin/usuarios" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mensajes de error -->
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Formulario -->
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>
+                                <i class="fas fa-user-plus" th:if="!${editando}"></i>
+                                <i class="fas fa-user-edit" th:if="${editando}"></i>
+                                <span th:text="${editando} ? 'Editar Usuario' : 'Crear Nuevo Usuario'"></span>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="${editando} ? '/admin/usuarios/editar/' + ${usuario.usuarioId} : '/admin/usuarios/nuevo'"
+                                  method="post"
+                                  th:object="${usuario}">
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="personaId" class="form-label">
+                                                <i class="fas fa-id-card"></i> Persona ID *
+                                            </label>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   id="personaId"
+                                                   th:field="*{personaId}"
+                                                   th:classappend="${#fields.hasErrors('personaId')} ? 'is-invalid' : ''"
+                                                   placeholder="UUID de la persona"
+                                                   required>
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('personaId')}" th:errors="*{personaId}"></div>
+                                            <div class="form-text">Debe ser el UUID de una persona existente en el sistema</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="nombreUsuario" class="form-label">
+                                                <i class="fas fa-user"></i> Nombre de Usuario *
+                                            </label>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   id="nombreUsuario"
+                                                   th:field="*{nombreUsuario}"
+                                                   th:classappend="${#fields.hasErrors('nombreUsuario')} ? 'is-invalid' : ''"
+                                                   placeholder="usuario123"
+                                                   required>
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('nombreUsuario')}" th:errors="*{nombreUsuario}"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="password" class="form-label">
+                                                <i class="fas fa-lock"></i>
+                                                <span th:text="${editando} ? 'Nueva Contraseña (opcional)' : 'Contraseña *'"></span>
+                                            </label>
+                                            <input type="password"
+                                                   class="form-control"
+                                                   id="password"
+                                                   th:field="*{password}"
+                                                   th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
+                                                   th:required="${!editando}"
+                                                   placeholder="Mínimo 6 caracteres">
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                                            <div class="form-text" th:if="${editando}">Deja vacío para mantener la contraseña actual</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="rolId" class="form-label">
+                                                <i class="fas fa-user-tag"></i> Rol *
+                                            </label>
+                                            <select class="form-select"
+                                                    id="rolId"
+                                                    th:field="*{rolId}"
+                                                    th:classappend="${#fields.hasErrors('rolId')} ? 'is-invalid' : ''"
+                                                    required>
+                                                <option value="">Selecciona un rol</option>
+                                                <option th:each="rol : ${roles}"
+                                                        th:value="${rol.rolId}"
+                                                        th:text="${rol.nombreRol} + ' - ' + ${rol.descripcion}">
+                                                </option>
+                                            </select>
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('rolId')}" th:errors="*{rolId}"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Información adicional si estamos editando -->
+                                <div th:if="${editando}" class="alert alert-info">
+                                    <h6><i class="fas fa-info-circle"></i> Información actual:</h6>
+                                    <p class="mb-1"><strong>Usuario ID:</strong> <span th:text="${usuario.usuarioId}"></span></p>
+                                    <p class="mb-0"><strong>Rol actual:</strong> <span th:text="${usuario.nombreRol}"></span></p>
+                                </div>
+
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <a href="/admin/usuarios" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i>
+                                        <span th:text="${editando} ? 'Actualizar Usuario' : 'Crear Usuario'"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ayuda -->
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-8">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6><i class="fas fa-question-circle"></i> Ayuda</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="mb-0">
+                                <li><strong>Persona ID:</strong> Debe ser el UUID de una persona que ya existe en el módulo de gestión de personas</li>
+                                <li><strong>Nombre de Usuario:</strong> Debe ser único en el sistema</li>
+                                <li><strong>Contraseña:</strong> Mínimo 6 caracteres, se encriptará automáticamente</li>
+                                <li><strong>Rol:</strong> Define los permisos del usuario en el sistema</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Generar UUID aleatorio para testing
+    function generarUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    // Botón para generar UUID de prueba (solo para desarrollo)
+    document.addEventListener('DOMContentLoaded', function() {
+        const personaIdInput = document.getElementById('personaId');
+        if (personaIdInput && !personaIdInput.value) {
+            const helpText = personaIdInput.nextElementSibling.nextElementSibling;
+            helpText.innerHTML += ' <br><small><a href="#" onclick="document.getElementById(\'personaId\').value = generarUUID(); return false;" class="text-decoration-none">🔗 Generar UUID de prueba</a></small>';
+        }
+    });
+</script>
+</body>
+</html>
