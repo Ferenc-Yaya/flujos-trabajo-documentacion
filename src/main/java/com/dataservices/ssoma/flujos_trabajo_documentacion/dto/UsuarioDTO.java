@@ -1,5 +1,6 @@
 package com.dataservices.ssoma.flujos_trabajo_documentacion.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
@@ -26,7 +27,7 @@ public class UsuarioDTO {
     private String nombreUsuario;
 
     // Solo para creación/actualización - nunca se devuelve en respuestas
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String password;
 

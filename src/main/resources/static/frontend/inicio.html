@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login - Sistema SSOMA</title>
+</head>
+<body>
+<h1>Sistema SSOMA - Login</h1>
+
+<form id="loginForm">
+  <table>
+    <tr>
+      <td>Usuario:</td>
+      <td><input type="text" id="nombreUsuario" required></td>
+    </tr>
+    <tr>
+      <td>Contraseña:</td>
+      <td><input type="password" id="password" required></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <button type="submit">Iniciar Sesión</button>
+      </td>
+    </tr>
+  </table>
+</form>
+
+<div id="mensaje"></div>
+
+<br>
+<p>Enlaces:</p>
+<a href="usuarios.html">Crear Usuario</a> |
+<a href="roles.html">Crear Rol</a>
+
+<script>
+  document.getElementById('loginForm').onsubmit = function(e) {
+      e.preventDefault();
+
+      const usuario = document.getElementById('nombreUsuario').value;
+      const password = document.getElementById('password').value;
+
+      fetch('/api/v1/usuarios/autenticar', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+              nombreUsuario: usuario,
+              password: password
+          })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              document.getElementById('mensaje').innerHTML =
+                  '<p style="color: green;">Login exitoso! Usuario: ' + data.data.nombreUsuario + '</p>';
+          } else {
+              document.getElementById('mensaje').innerHTML =
+                  '<p style="color: red;">Error: ' + data.message + '</p>';
+          }
+      })
+      .catch(error => {
+          document.getElementById('mensaje').innerHTML =
+              '<p style="color: red;">Error de conexión</p>';
+      });
+  };
+</script>
+</body>
+</html>

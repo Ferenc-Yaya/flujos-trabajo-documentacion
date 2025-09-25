@@ -301,7 +301,13 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario usuario = usuarioRepository.findByNombreUsuario(nombreUsuario)
                 .orElseThrow(() -> new AuthenticationException("Credenciales inválidas"));
 
-        if (!passwordUtil.verifyPassword(password, usuario.getPasswordHash())) {
+        // Debug temporal
+        log.info("Password enviada: {}", password);
+        log.info("Hash en BD: {}", usuario.getPasswordHash());
+        boolean isValid = passwordUtil.verifyPassword(password, usuario.getPasswordHash());
+        log.info("Validación resultado: {}", isValid);
+
+        if (!isValid) {
             throw new AuthenticationException("Credenciales inválidas");
         }
 

@@ -44,40 +44,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        // Recursos públicos
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-                        .requestMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-
-                        // Endpoints de API REST (para testing)
-                        .requestMatchers("/api/v1/usuarios/autenticar").permitAll()
-                        .requestMatchers("/api/v1/**").hasAnyRole("ADMIN", "SUPERVISOR", "OPERADOR", "CONSULTA")
-
-                        // Páginas web
-                        .requestMatchers("/login", "/register", "/").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/supervisor/**").hasAnyRole("ADMIN", "SUPERVISOR")
-
-                        // Todo lo demás requiere autenticación
-                        .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .loginProcessingUrl("/perform_login")
-                        .defaultSuccessUrl("/dashboard", true)
-                        .failureUrl("/login?error=true")
-                        .usernameParameter("nombreUsuario")
-                        .passwordParameter("password")
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/perform_logout")
-                        .logoutSuccessUrl("/login?logout=true")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                        .permitAll()
-                )
-                .exceptionHandling(ex -> ex
-                        .accessDeniedPage("/access-denied")
+                        // Permitir todo por ahora para testing
+                        .anyRequest().permitAll()
                 );
 
         http.authenticationProvider(authenticationProvider());

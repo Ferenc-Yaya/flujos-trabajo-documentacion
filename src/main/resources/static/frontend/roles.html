@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crear Rol</title>
+</head>
+<body>
+<h1>Crear Rol</h1>
+
+<form id="rolForm">
+    <table>
+        <tr>
+            <td>Nombre del Rol:</td>
+            <td><input type="text" id="nombreRol" required maxlength="100"></td>
+        </tr>
+        <tr>
+            <td>Descripción:</td>
+            <td><textarea id="descripcion" rows="3" cols="30"></textarea></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button type="submit">Crear Rol</button>
+            </td>
+        </tr>
+    </table>
+</form>
+
+<div id="mensaje"></div>
+
+<h2>Roles Existentes</h2>
+<div id="listaRoles">Cargando...</div>
+
+<br>
+<a href="inicio.html">Login</a> | <a href="usuarios.html">Crear Usuario</a>
+
+<script>
+    window.onload = function() {
+        cargarRoles();
+    };
+
+    function cargarRoles() {
+        fetch('/api/v1/roles/lista')
+        .then(response => response.json())
+        .then(data => {
+            let html = '<table border="1"><tr><th>Nombre</th><th>Descripción</th></tr>';
+            if (data.success && data.data) {
+                data.data.forEach(rol => {
+                    html += '<tr><td>' + rol.nombreRol + '</td><td>' + (rol.descripcion || '') + '</td></tr>';
+                });
+            }
+            html += '</table>';
+            document.getElementById('listaRoles').innerHTML = html;
+        });
+    }
+
+    document.getElementById('rolForm').onsubmit = function(e) {
+        e.preventDefault();
+
+        const rol = {
+            nombreRol: document.getElementById('nombreRol').value,
+            descripcion: document.getElementById('descripcion').value
+        };
+
+        fetch('/api/v1/roles', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(rol)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('mensaje').innerHTML =
+                    '<p style="color: green;">Rol creado!</p>';
+                document.getElementById('rolForm').reset();
+                cargarRoles();
+            } else {
+                document.getElementById('mensaje').innerHTML =
+                    '<p style="color: red;">Error: ' + data.message + '</p>';
+            }
+        });
+    };
+</script>
+</body>
+</html>

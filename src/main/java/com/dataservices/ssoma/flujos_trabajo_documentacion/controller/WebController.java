@@ -49,9 +49,14 @@ public class WebController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(@AuthenticationPrincipal UserPrincipal userPrincipal, Model model) {
-        model.addAttribute("usuario", userPrincipal.getNombreUsuario());
-        model.addAttribute("rol", userPrincipal.getNombreRol());
+    public String dashboard() {
+        return "redirect:/frontend/inicio.html";
+    }
+
+    @GetMapping("/test-dashboard")
+    public String testDashboard(Model model) {
+        model.addAttribute("usuario", "Usuario Test");
+        model.addAttribute("rol", "ADMIN");
         return "dashboard";
     }
 
@@ -178,13 +183,17 @@ public class WebController {
 
     @GetMapping("/profile")
     public String perfil(@AuthenticationPrincipal UserPrincipal userPrincipal, Model model) {
-        try {
-            UsuarioDTO usuario = usuarioService.obtenerUsuarioPorId(userPrincipal.getUsuarioId());
-            model.addAttribute("usuario", usuario);
-            return "profile";
-        } catch (Exception e) {
-            log.error("Error obteniendo perfil", e);
-            return "redirect:/dashboard?error=" + e.getMessage();
+        if (userPrincipal != null) {
+            try {
+                UsuarioDTO usuario = usuarioService.obtenerUsuarioPorId(userPrincipal.getUsuarioId());
+                model.addAttribute("usuario", usuario);
+                return "profile";
+            } catch (Exception e) {
+                log.error("Error obteniendo perfil", e);
+                return "redirect:/dashboard?error=" + e.getMessage();
+            }
+        } else {
+            return "redirect:/dashboard";
         }
     }
 
